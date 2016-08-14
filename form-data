@@ -1,0 +1,189 @@
+<?php
+	$a = !empty($_GET['a']) ? $_GET['a'] : "reset";
+	$idrepo = !empty($_GET['id']) ? $_GET['id'] : " ";
+	
+	$kdb = koneksidatabase();
+	$a = @$_GET["a"];
+	$sql = @$_POST["sql"];
+	
+	if(isset($_POST['idkategori'])) {
+    $idkategori = $_POST['idkategori'];
+	} else {
+		$idkategori = '';
+	}
+	
+	//Buat Upload File
+	$upload = @$_POST["upload"];
+		switch ($upload) {
+			case "1": upload_data(); break;}
+		//switch ($sql) {
+			//case "insert": sql_insert(); break;
+			//case "update": sql_update();break;
+			//case "delete": sql_delete();break;}
+		switch ($a) {
+			case "reset" :  curd_read();   break;
+			//case "tambah":  curd_create(); break;
+			//case "edit"  :  curd_update($idrepo); break;	
+			//case "hapus" :  curd_delete($idrepo); break;
+			default : curd_read(); break;}
+		mysqli_close($kdb);
+
+		function curd_read() { 
+			global $kdb;
+			global $idkategori;
+			$hasil = sql_select();
+			$i=1;
+			?>
+    
+	
+    <div class="">
+	<div class="row">
+	
+		<div class="clearfix"></div>
+			<div class="col-md-12 col-sm-12 col-xs-12">
+				<div class="x_panel">
+					<h2>REPOSITORY DINAS BINA MARGA PROPINSI LAMPUNG</h2>
+					<form class="col-md-3 col-sm-3 col-xs-12" action="index.php?menu=2" method="POST">
+						<div class="form-group">
+						<select class="form-control" name="idkategori" id="idkategori">
+							<option value="">---Pilih Kategori---</option>
+							<?php
+								global $kdb;
+								$sqlquery   = "select `idkategori`, `nmkategori`, `publish` from kategori where `publish` = 'T' ";
+								$hasilquery = mysqli_query($kdb, $sqlquery) or die (mysql_error());
+								while ( $baris = mysqli_fetch_assoc($hasilquery)) {
+										$value = $baris["idkategori"];
+										$caption = $baris ["nmkategori"];
+										if ($row["idkategori"] == $baris ["idkategori"])
+										{$selstr = "selected"; }
+										else {$selstr = ""; }
+							?>
+							<option value="<?php echo $value ?>" <?php echo $selstr ?>>
+								&nbsp; <?php echo $caption; ?> &nbsp;
+							</option>
+							<?php
+							}
+							?>
+							</select>
+					  </div>
+					  <button type="submit" class="btn btn-default">Cari</button>
+					</form>
+					<div class="x_content">
+						<table id="example" class="table table-striped responsive-utilities jambo_table">
+							<thead>
+								<tr class="headings">
+									<th>No</th>
+									<th>Nama File </th>
+									<!-- <th>User</th> -->
+									<th>Bidang </th>
+									<th>Kategori</th>
+									<!--<th>Tanggal Upload</th>-->
+									<!-- <th>File Upload</th> -->
+									<th>File Size (Byte)</th>
+									<th>Action</th>
+								</tr>
+							</thead>
+							<tbody>
+							<?php
+							while($baris = mysqli_fetch_array($hasil)){
+							?>
+								<tr>
+									<td><?php echo $i; ?></td>
+									
+									<td><?php echo $baris['nmrepo']; ?></td>
+									<!-- <td><?php echo $baris['nmuser']; ?></td> -->
+									<td><?php echo $baris['bidang']; ?></td>
+									<td><?php echo $baris['nmkategori']; ?></td>
+									<!--<td><?php echo $baris['tgl_upload']; ?></td>-->
+									<!--<td><?php echo $baris['file']; ?></td>-->
+									<td><?php echo $baris['file_size']; ?></td>
+									<td>
+										<a href="index.php?menu=4&idrepo=<?php echo $baris['idrepo']; ?>"class="btn btn-success btn-sm" title="Lihat Detail Data Repository">
+											<span class="glyphicon glyphicon-check" title="Lihat Detail Data Repository"></span> Detail
+										</a> 
+									</td>
+								</tr>
+							<?php
+								$i++;  
+							}
+							?>
+							</tbody>
+
+						</table>
+					</div>
+		<?php
+			mysqli_free_result($hasil);
+			}
+		?>
+		
+		
+			
+			
+			<?php 	
+		function koneksidatabase()
+		{
+			include('./menu/koneksi/koneksi.php');
+			return $kdb;
+		}
+
+		function sql_select()
+		{
+		  global $kdb;
+		  global $idkategori;
+		  //if($_SESSION['idlevel']=="1") 
+		 // { //Super Admin
+		  $sql = "select a.*, b.nmuser, c.bidang, d.nmkategori from repo as a, user as b, bidang as c, kategori as d where b.iduser = a.iduser and c.idbidang = a.idbidang and d.idkategori = a.idkategori";
+		  
+		  if($idkategori!='') 
+		  {
+			$sql .= " and idkategori = $idkategori ";
+		  }
+		  $hasil = mysqli_query($kdb, $sql) or die(mysqli_error());
+		  return $hasil;
+		  //}
+		  
+		  //if($_SESSION['idlevel']=="3") { //Pegawai
+		  //$sql = "select a.*, b.nmuser, c.bidang, d.nmkategori from repo as a, user as b, bidang as c, kategori as d where b.iduser = a.iduser and c.idbidang = a.idbidang and d.idkategori = a.idkategori and c.idbidang = ".$_SESSION['idbidang'];
+		  //$hasil = mysqli_query($kdb, $sql) or die(mysqli_error());
+		  //return $hasil;
+		  //}
+		  
+		 
+		  
+		 }
+		
+
+		function sql_select_byid($idrepo)
+		{
+		  global $kdb;
+		  $sql = " select * from repo where idrepo = ".$idrepo;  
+		  $hasil2 = mysqli_query($kdb, $sql) or die(mysql_error());
+		  return $hasil2;
+		}
+
+		?>
+              </div>
+            </div>
+
+            <br />
+            <br />
+            <br />
+
+          </div>
+        </div>
+		
+        <!-- footer content -->
+        
+      <!-- /page content -->
+    
+  <div id="custom_notifications" class="custom-notifications dsp_none">
+    <ul class="list-unstyled notifications clearfix" data-tabbed_notifications="notif-group">
+    </ul>
+    <div class="clearfix"></div>
+    <div id="notif-group" class="tabbed_notifications"></div>
+  </div>
+
+  
+</body>
+
+</html>
